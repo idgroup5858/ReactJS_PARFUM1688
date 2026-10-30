@@ -1,0 +1,658 @@
+@import "tailwindcss";
+
+/* `dark:` classes follow <html class="dark"> (the theme switch), not the OS setting */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Design tokens are taken one-to-one from ReactJS_Language (which took them from ReactJS_Recipe / hr-ui) */
+@theme {
+  /* Inter covers Latin (Uzbek) and Cyrillic (Russian) */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  /* PARFUM1688 headings in the customer app (brand, banner titles, perfume names) — also has Cyrillic */
+  --font-serif: "Cormorant Garamond Variable", Georgia, "Times New Roman", serif;
+  /* Cormorant draws old-style digits by default ("1" looks like "ı") — lining digits for "Chanel N°5", "1 Million" */
+  --font-serif--font-feature-settings: "lnum";
+  /* Logo "PARFUM1688": Bodoni Moda — fashion-house Didone whose "1" has a clear flag (in Cormorant / Cinzel it reads as "I").
+     Latin only — the logo has no Cyrillic */
+  --font-brand: "Bodoni Moda Variable", "Cormorant Garamond Variable", Georgia, serif;
+
+  /* PARFUM1688 emerald (#047857). Static fallbacks only: the live scale is derived from --accent below */
+  --color-brand-50: #f2f8f6;
+  --color-brand-100: #e3f0ec;
+  --color-brand-200: #c2e0d6;
+  --color-brand-300: #93c9b7;
+  --color-brand-400: #5aac91;
+  --color-brand-500: #2b9471;
+  --color-brand-600: #117e5f;
+  --color-brand-700: #047857;
+  --color-brand-800: #036046;
+  --color-brand-900: #024331;
+  /* solid accent fills (buttons, avatars); brand-700 doubles as the accent text color */
+  --color-brand-fill: #047857;
+  --color-brand-fill-hover: #036046;
+
+  --color-page: #efefef;
+  /* cards, inputs, header and sidebar */
+  --color-surface: #fff;
+
+  /* One small corner radius for cards, inputs, buttons and dialogs (rounded-full stays round) */
+  --radius: 3px;
+  --radius-xs: 3px;
+  --radius-sm: 3px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
+  --radius-2xl: 3px;
+}
+
+/* Default accent (emerald, theme/accents.ts). A color picked in Sozlamalar sets data-accent + inline --accent* on <html>
+   (src/theme/appearance.ts and the inline script on load), which wins over these. No --accent-fill-dark here:
+   emerald has none, and a value on :root would leak into every other color that has none either */
+:root {
+  --accent: #047857;
+  --accent-ink: #6ee7b7;
+}
+
+/* ───────────────────────── Dark theme ─────────────────────────
+   <html class="dark"> is set before the first paint by the inline script (src/theme/themeInit.ts) and toggled by
+   src/theme/appearance.ts. Components keep their light-theme classes; the palettes are remapped here:
+   - neutral scale is inverted (text-neutral-900 turns light, bg-neutral-50 becomes a dark fill);
+   - status colors: 50–200 become translucent tints, 700 (used for text) the bright 400 tone;
+   - brand 50–300 become translucent tints and 700–900 light text tones; solid fills use --color-brand-fill;
+   - bg-white surfaces become dark cards (see the utilities layer at the end of this file). */
+.dark {
+  color-scheme: dark;
+
+  --color-page: #0f0f0f;
+  --color-surface: #181818;
+
+  --color-neutral-50: #1f1f1f;
+  --color-neutral-100: #262626;
+  --color-neutral-200: #2e2e2e;
+  --color-neutral-300: #3d3d3d;
+  --color-neutral-400: #6f6f6f;
+  --color-neutral-500: #9b9b9b;
+  --color-neutral-600: #b4b4b4;
+  --color-neutral-700: #cdcdcd;
+  --color-neutral-800: #e1e1e1;
+  --color-neutral-900: #eeeeee;
+  --color-neutral-950: #f8f8f8;
+
+  --color-red-50: rgb(248 113 113 / 0.1);
+  --color-red-100: rgb(248 113 113 / 0.16);
+  --color-red-200: rgb(248 113 113 / 0.3);
+  --color-red-700: #f87171;
+  --color-emerald-50: rgb(52 211 153 / 0.1);
+  --color-emerald-100: rgb(52 211 153 / 0.16);
+  --color-emerald-200: rgb(52 211 153 / 0.3);
+  --color-emerald-700: #34d399;
+  --color-amber-50: rgb(251 191 36 / 0.1);
+  --color-amber-100: rgb(251 191 36 / 0.16);
+  --color-amber-200: rgb(251 191 36 / 0.3);
+  --color-amber-700: #fbbf24;
+  --color-sky-50: rgb(56 189 248 / 0.1);
+  --color-sky-100: rgb(56 189 248 / 0.16);
+  --color-sky-200: rgb(56 189 248 / 0.3);
+  --color-sky-700: #38bdf8;
+}
+
+/* ───────────────────────── Accent color ─────────────────────────
+   The whole brand-* scale is derived from --accent / --accent-ink / --accent-fill-dark (emerald by default, see :root;
+   staff pick another one in Sozlamalar, the customer app uses the shop color). Unlayered, so it beats @theme. */
+html {
+  --color-brand-50: color-mix(in srgb, var(--accent) 5%, #fff);
+  --color-brand-100: color-mix(in srgb, var(--accent) 11%, #fff);
+  --color-brand-200: color-mix(in srgb, var(--accent) 24%, #fff);
+  --color-brand-300: color-mix(in srgb, var(--accent) 43%, #fff);
+  --color-brand-400: color-mix(in srgb, var(--accent) 66%, #fff);
+  --color-brand-500: color-mix(in srgb, var(--accent) 85%, #fff);
+  --color-brand-600: color-mix(in srgb, var(--accent) 94%, #fff);
+  --color-brand-700: var(--accent);
+  --color-brand-800: color-mix(in srgb, var(--accent) 80%, #000);
+  --color-brand-900: color-mix(in srgb, var(--accent) 56%, #000);
+  --color-brand-fill: var(--accent);
+  --color-brand-fill-hover: color-mix(in srgb, var(--accent) 80%, #000);
+}
+/* dark theme: translucent tints and light text tones from --accent-ink */
+html.dark {
+  --color-brand-50: color-mix(in srgb, var(--accent-ink) 10%, transparent);
+  --color-brand-100: color-mix(in srgb, var(--accent-ink) 16%, transparent);
+  --color-brand-200: color-mix(in srgb, var(--accent-ink) 28%, transparent);
+  --color-brand-300: color-mix(in srgb, var(--accent-ink) 45%, transparent);
+  --color-brand-400: color-mix(in srgb, var(--accent-ink) 70%, var(--accent));
+  --color-brand-500: color-mix(in srgb, var(--accent-ink) 82%, var(--accent));
+  --color-brand-600: color-mix(in srgb, var(--accent-ink) 92%, var(--accent));
+  --color-brand-700: var(--accent-ink);
+  --color-brand-800: color-mix(in srgb, var(--accent-ink) 75%, #fff);
+  --color-brand-900: color-mix(in srgb, var(--accent-ink) 50%, #fff);
+  --color-brand-fill: var(--accent-fill-dark, var(--accent));
+  --color-brand-fill-hover: color-mix(in srgb, var(--accent-fill-dark, var(--accent)) 85%, #fff);
+}
+
+/* Deep accent banner (customer home carousel, staff login): dark wine → accent, white text */
+@utility bg-hero {
+  color: #fff;
+  background-color: color-mix(in srgb, var(--accent) 45%, #000);
+  background-image:
+    radial-gradient(120% 140% at 85% 30%, var(--accent) 0%, transparent 60%),
+    linear-gradient(100deg, color-mix(in srgb, var(--accent) 35%, #000) 0%, color-mix(in srgb, var(--accent) 80%, #000) 100%);
+}
+
+/* Light grey stage behind product photos (transparent PNG bottles), like the reference shop */
+@utility bg-photo {
+  background-color: #b5b5b5;
+  :where(.dark) & {
+    background-color: #3a3a3a;
+  }
+}
+
+/* Always-light fill for small round knobs and indicators: toggle-switch knob (Switch), carousel dot on the hero.
+   Plain bg-white turns into the dark surface in dark mode (end of this file) — empty PIN dots and pending
+   timeline steps rely on that, so they never use this. */
+@utility bg-light {
+  background-color: #fff;
+  :where(.dark) & {
+    background-color: #e5e5e5;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  /* Tailwind v4 defaults borders to currentColor; keep plain `border` a soft hairline */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-neutral-200);
+  }
+
+  body {
+    @apply bg-page font-sans text-neutral-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-brand-100 text-brand-900;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-neutral-400;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="range"] {
+    accent-color: var(--color-brand-700);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+  }
+  input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"]):focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    border-color: var(--color-brand-700);
+    box-shadow: none;
+  }
+  input,
+  textarea {
+    caret-color: var(--color-brand-700);
+  }
+  /* the search field draws its own clear (✕) button */
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neutral-300) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-neutral-300;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-neutral-400;
+  }
+}
+
+@layer components {
+  .page-enter {
+    animation: page-enter 0.18s ease-out;
+  }
+  /* wrong PIN */
+  .shake {
+    animation: shake 0.32s ease-in-out;
+  }
+  /* small uppercase section/card title (CardHeader, Modal, PageHeader) */
+  .title-section {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  /* hide scrollbars of horizontal chip / card rails */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* ───────────────────────── SweetAlert2 ─────────────────────────
+   Dialogs get the same anatomy as the app's own modals: header (icon · uppercase title · ✕ with a
+   hairline under it) → body → full-width actions. Toasts keep SweetAlert's compact row layout.
+   Unlayered, multi-class selectors: SweetAlert injects its own CSS at runtime. */
+.swal2-container {
+  --swal2-width: 26rem;
+  --swal2-padding: 0;
+  --swal2-border-radius: 3px;
+  --swal2-backdrop: rgba(0, 0, 0, 0.4);
+  --swal2-icon-animations: false;
+  --swal2-show-animation: none;
+  --swal2-hide-animation: none;
+  --swal2-toast-show-animation: none;
+  --swal2-toast-hide-animation: none;
+  --swal2-timer-progress-bar-background: var(--color-brand-700);
+}
+.swal2-container .swal2-popup {
+  border: 1px solid var(--color-neutral-200);
+  background: var(--color-surface) !important;
+  color: var(--color-neutral-900) !important;
+}
+
+.swal2-container .swal2-popup.swal2-modal {
+  --swal2-icon-zoom: 0.36;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.35);
+}
+.swal2-container .swal2-popup.swal2-modal > * {
+  grid-column: 1 / -1;
+}
+
+/* Header row */
+.swal2-container .swal2-popup.swal2-modal::before {
+  content: "";
+  grid-column: 1 / -1;
+  grid-row: 1;
+  border-bottom: 1px solid var(--color-neutral-200);
+  pointer-events: none;
+}
+.swal2-container .swal2-popup.swal2-modal > .swal2-icon {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  margin: 0 0 0 calc(1.25rem / var(--swal2-icon-zoom));
+}
+.swal2-container .swal2-popup.swal2-modal > .swal2-title {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  margin: 0;
+  padding: 1.05rem 0.75rem;
+  color: var(--color-brand-800);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.14em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.swal2-container .swal2-popup.swal2-modal:not([class*="swal2-icon-"]) > .swal2-title {
+  padding-left: 1.5rem;
+}
+.swal2-container .swal2-popup.swal2-modal > .swal2-close {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: center;
+  justify-self: end;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0.75rem 0 0;
+  border-radius: 3px;
+  color: var(--color-neutral-400);
+  font-size: 1rem;
+}
+.swal2-container .swal2-popup.swal2-modal > .swal2-close:hover {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+}
+.swal2-container .swal2-close:focus-visible {
+  outline: none;
+  box-shadow: none;
+  background: var(--color-neutral-100);
+}
+.swal2-container .swal2-actions > button:focus-visible {
+  outline: 1px solid var(--color-brand-400) !important;
+  outline-offset: 1px;
+  box-shadow: none !important;
+}
+
+/* Body */
+.swal2-container .swal2-popup.swal2-modal > .swal2-html-container {
+  margin: 0;
+  padding: 1.25rem 1.5rem 0;
+  color: var(--color-neutral-600);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+/* Actions */
+.swal2-container .swal2-popup.swal2-modal > .swal2-actions {
+  flex-wrap: nowrap;
+  justify-content: stretch;
+  gap: 0.5rem;
+  width: auto;
+  margin: 0;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+.swal2-container .swal2-popup.swal2-modal > .swal2-actions > button {
+  flex: 1 1 0;
+  margin: 0;
+}
+.swal2-container .swal2-styled {
+  @apply inline-flex h-9 items-center justify-center rounded px-5 py-0 text-xs font-semibold uppercase tracking-[0.12em];
+  box-shadow: none !important;
+}
+.swal2-container .swal2-styled.swal2-confirm {
+  color: #fff;
+  background-color: var(--color-brand-fill) !important;
+  border: 1px solid var(--color-brand-fill);
+}
+.swal2-container .swal2-styled.swal2-confirm:hover {
+  background-color: var(--color-brand-fill-hover) !important;
+  background-image: none;
+}
+.swal2-container .swal2-styled.swal2-cancel,
+.swal2-container .swal2-styled.swal2-deny {
+  color: var(--color-neutral-700);
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-neutral-300);
+}
+.swal2-container .swal2-styled.swal2-cancel:hover,
+.swal2-container .swal2-styled.swal2-deny:hover {
+  background-color: var(--color-neutral-50) !important;
+  background-image: none;
+  border-color: var(--color-neutral-400);
+}
+
+/* Toasts (corner notifications) */
+.swal2-container .swal2-popup.swal2-toast {
+  border-radius: 3px;
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.3);
+}
+.swal2-container .swal2-popup.swal2-toast .swal2-title {
+  color: var(--color-neutral-900);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Muted status icons that match the palette */
+.swal2-container .swal2-icon.swal2-success {
+  border-color: var(--color-emerald-700);
+  color: var(--color-emerald-700);
+}
+.swal2-container .swal2-icon.swal2-success [class^="swal2-success-line"] {
+  background-color: var(--color-emerald-700);
+}
+.swal2-container .swal2-icon.swal2-success .swal2-success-ring {
+  border-color: var(--color-emerald-200);
+}
+.swal2-container .swal2-icon.swal2-error {
+  border-color: var(--color-red-700);
+  color: var(--color-red-700);
+}
+.swal2-container .swal2-icon.swal2-error [class^="swal2-x-mark-line"] {
+  background-color: var(--color-red-700);
+}
+.swal2-container .swal2-icon.swal2-warning {
+  border-color: var(--color-amber-500);
+  color: var(--color-amber-700);
+}
+.swal2-container .swal2-icon.swal2-info,
+.swal2-container .swal2-icon.swal2-question {
+  border-color: var(--color-brand-300);
+  color: var(--color-brand-700);
+}
+
+/* ───────────────────────── Toasts (src/lib/toast.ts) ─────────────────────────
+   Own elements, not SweetAlert: a SweetAlert toast would replace (and dismiss) any open SweetAlert dialog.
+   Same look as the old SweetAlert toasts; above modals (z-50) and SweetAlert (1060). */
+.app-toasts {
+  position: fixed;
+  z-index: 1070;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.app-toasts-bottom-end {
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  align-items: flex-end;
+}
+.app-toasts-top {
+  top: calc(0.75rem + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.app-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 3px;
+  background-color: var(--color-surface);
+  color: var(--color-neutral-900);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  box-shadow: 0 12px 32px -16px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: page-enter 0.18s ease-out;
+}
+.app-toast-leave {
+  animation: toast-leave 0.15s ease-in forwards;
+}
+.app-toast-icon {
+  display: flex;
+  flex-shrink: 0;
+}
+.app-toast-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.app-toast-success .app-toast-icon {
+  color: var(--color-emerald-700);
+}
+.app-toast-error .app-toast-icon {
+  color: var(--color-red-700);
+}
+.app-toast-info .app-toast-icon {
+  color: var(--color-brand-700);
+}
+
+@keyframes toast-leave {
+  to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-toast,
+  .app-toast-leave {
+    animation: none;
+  }
+}
+
+/* ───────────────────────── Buttons ─────────────────────────
+   Color / border / state only — size, padding, radius and layout stay on the element. */
+@utility btn-primary {
+  color: #fff;
+  cursor: pointer;
+  background-color: var(--color-brand-fill);
+  border: 1px solid var(--color-brand-fill);
+  transition: background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  &:hover:not(:disabled) {
+    background-color: var(--color-brand-fill-hover);
+    border-color: var(--color-brand-fill-hover);
+  }
+  &:focus-visible {
+    outline: 1px solid var(--color-brand-400);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Accent outline, e.g. secondary call to action */
+@utility btn-outline {
+  color: var(--color-brand-700);
+  cursor: pointer;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-brand-700);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  &:hover:not(:disabled) {
+    background-color: var(--color-brand-50);
+  }
+  &:focus-visible {
+    outline: 1px solid var(--color-brand-400);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-ghost {
+  color: var(--color-neutral-700);
+  cursor: pointer;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-neutral-300);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  &:hover:not(:disabled) {
+    color: var(--color-neutral-900);
+    background-color: var(--color-neutral-50);
+    border-color: var(--color-neutral-400);
+  }
+  &:focus-visible {
+    outline: 1px solid var(--color-brand-400);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-icon {
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-neutral-200);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  &:hover:not(:disabled) {
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+    border-color: var(--color-brand-200);
+  }
+  &:focus-visible {
+    outline: 1px solid var(--color-brand-400);
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-icon-danger {
+  color: var(--color-neutral-500);
+  cursor: pointer;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-neutral-200);
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  &:hover:not(:disabled) {
+    color: var(--color-red-700);
+    background-color: var(--color-red-50);
+    border-color: var(--color-red-200);
+  }
+  &:focus-visible {
+    outline: 1px solid #e3807a;
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* Dark theme, class level. Same layer and specificity as the utilities they replace, placed after them,
+   so variants such as hover:bg-neutral-50 still win where they apply. */
+@layer utilities {
+  /* white cards, inputs, header and sidebar become the dark surface (so do the empty PIN dots and pending order
+     steps). Knobs and dots that must stay light use bg-light instead (see above). */
+  :where(.dark) .bg-white {
+    background-color: var(--color-surface);
+  }
+  /* solid accent fills keep a deep tone (brand-700 itself turns into the light text color) */
+  :where(.dark) .bg-brand-700 {
+    background-color: var(--color-brand-fill);
+  }
+  :where(.dark) .border-brand-700 {
+    border-color: var(--color-brand-fill);
+  }
+}
