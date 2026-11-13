@@ -137,12 +137,10 @@ html.dark {
     linear-gradient(100deg, color-mix(in srgb, var(--accent) 35%, #000) 0%, color-mix(in srgb, var(--accent) 80%, #000) 100%);
 }
 
-/* Light grey stage behind product photos (transparent PNG bottles), like the reference shop */
+/* White stage behind product photos: bottle images are shot on white, so the photo blends into the card.
+   Stays white in dark mode too (plain bg-white turns dark there — see the end of this file). */
 @utility bg-photo {
-  background-color: #b5b5b5;
-  :where(.dark) & {
-    background-color: #3a3a3a;
-  }
+  background-color: #ffffff;
 }
 
 /* Always-light fill for small round knobs and indicators: toggle-switch knob (Switch), carousel dot on the hero.
